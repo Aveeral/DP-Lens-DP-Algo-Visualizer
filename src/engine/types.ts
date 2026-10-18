@@ -20,7 +20,7 @@ export interface Step {
   index: number;
   cell: CellId; // cell being decided
   terms: Term[]; // all candidates considered
-  chosen: number; // index into terms (winner)
+  chosen: number; // index into terms (winner), or -1 for sum/base
   result: number; // value written
   formula: string; // general recurrence, LaTeX-free plain text
   substituted: string; // with real numbers
@@ -49,18 +49,83 @@ export interface Trace {
   answer: { value: number; cell: CellId };
   traceback: { path: CellId[]; solution: unknown }; // items, subsequence, bracketing
   stats: { naiveCalls: number; uniqueSubproblems: number };
+  pictureData?: unknown;
 }
 
 export type Variant = 'correct' | string; // break ids from B5, e.g. 'knapsack-reuse'
 
 export interface BreakDef {
   id: string;
-  label: string;
+  name: string;
   description: string;
+  brokenFormula: string;
 }
 
 export interface Preset<T = unknown> {
   name: string;
   input: T;
   description: string;
+}
+
+export interface AlgoModule<T = unknown> {
+  id: AlgoId;
+  name: string;
+  solve: (input: T, variant?: Variant) => Trace;
+  validate: (input: T) => string | null;
+  presets: Preset<T>[];
+  breaks: BreakDef[];
+}
+
+// Algorithm-specific input and solution types
+export interface BinomialInput {
+  n: number;
+  k: number;
+}
+
+export interface McmInput {
+  dims: number[];
+}
+
+export interface BracketTreeNode {
+  i: number;
+  j: number;
+  k?: number;
+  name?: string;
+  left?: BracketTreeNode;
+  right?: BracketTreeNode;
+}
+
+export interface McmSolution {
+  bracketed: string;
+  bracketTree: BracketTreeNode;
+}
+
+export interface LcsInput {
+  a: string;
+  b: string;
+}
+
+export interface LcsSolution {
+  subsequence: string;
+  matchedPairs: [number, number][]; // [indexInA, indexInB] (0-indexed)
+  allLcs: string[];
+}
+
+export interface KnapsackItem {
+  id: string;
+  name: string;
+  w: number;
+  v: number;
+}
+
+export interface KnapsackInput {
+  items: KnapsackItem[];
+  W: number;
+}
+
+export interface KnapsackSolution {
+  items: KnapsackItem[];
+  totalWeight: number;
+  totalValue: number;
+  hasTie: boolean;
 }
